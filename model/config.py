@@ -36,6 +36,7 @@ For model
 cmdParser.add_argument('--model_name', help="model name", required=True)
 cmdParser.add_argument('--model_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
 cmdParser.add_argument('--model_lib', type=argparse.FileType('r'), help="the path to prediction model lib script", required=True)
+cmdParser.add_argument('--cluster_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
 cmdParser.add_argument('--dev_name', help="which device should this model runs on. ('cpu' or a physical gpu device name)", required=True)
 cmdParser.add_argument('--gpu_mem', type=int, help="the limit for gpu memory. (not work when use 'cpu' in dev_name)", default=0)
 

@@ -25,7 +25,7 @@ if __name__ == "__main__":
     logger_config = get_logger_config(cmdArgs.logdir, cmdArgs.model_name)
 
     uvicorn.run(
-        "web:app", 
+        "web:app",
         host=cmdArgs.ip, 
         port=cmdArgs.port, 
         reload=False, 
