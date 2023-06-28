@@ -17,7 +17,7 @@
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from BaseModel import *
+from base_model import *
 
 import tensorflow as tf
 import keras
