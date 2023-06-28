@@ -33,12 +33,30 @@ cmdParser.add_argument('--logdir', type=pathlib.Path, help="the log file directo
 """
 For model
 """
-cmdParser.add_argument('--model_name', help="model name", required=True)
+cmdParser.add_argument('--cluster_type', help="cluster type", required=True)
+cmdParser.add_argument('--cluster_id', type=int, help="cluster id", required=True)
+cmdParser.add_argument('--cluster_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
+
 cmdParser.add_argument('--model_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
 cmdParser.add_argument('--model_lib', type=argparse.FileType('r'), help="the path to prediction model lib script", required=True)
-cmdParser.add_argument('--cluster_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
 cmdParser.add_argument('--dev_name', help="which device should this model runs on. ('cpu' or a physical gpu device name)", required=True)
 cmdParser.add_argument('--gpu_mem', type=int, help="the limit for gpu memory. (not work when use 'cpu' in dev_name)", default=0)
+
+"""
+For database
+"""
+# cmdParser.add_argument('--db_host', default="127.0.0.1")
+# cmdParser.add_argument('--db_port', default="3306")
+# cmdParser.add_argument('--db_db', default="stf")
+# cmdParser.add_argument('--db_user', default="stf")
+# cmdParser.add_argument('--db_pwd', default="stf")
+
+# for local test only
+cmdParser.add_argument('--db_host',  help="database host", default="36.133.145.76")
+cmdParser.add_argument('--db_port', help="database port", type=int, default=53306)
+cmdParser.add_argument('--db_db', help="database name", default="acloud")
+cmdParser.add_argument('--db_user', help="database user", default="acloud")
+cmdParser.add_argument('--db_pwd', help="database password", default="acloud")
 
 
 def arg_to_env(args: argparse.Namespace):

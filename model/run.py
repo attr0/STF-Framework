@@ -22,7 +22,7 @@ import uvicorn
 if __name__ == "__main__":
     cmdArgs = cmdParser.parse_args()
     arg_to_env(cmdArgs)
-    logger_config = get_logger_config(cmdArgs.logdir, cmdArgs.model_name)
+    logger_config = get_logger_config()
 
     uvicorn.run(
         "web:app",

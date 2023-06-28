@@ -21,8 +21,8 @@ from BaseModel import *
 
 import tensorflow as tf
 import keras
-import numpy as np
-import random
+import pandas as pd
+import logging
 import sys
 import importlib
 
@@ -42,13 +42,14 @@ def load_model_class_from_path(path: str) -> BaseModel:
     return module.PredictionModel
 
 class Model:
-    name: str
+    logger: logging.Logger
     model: keras.Model
-    input_shape: tuple
     model_wapper: BaseModel
 
-    def init(self, name: str, dev_name: str, gpu_mem: int, model_path: int, model_lib: str) -> None:
-        self.name = name
+    def init(self, logger: logging.Logger, dev_name: str, gpu_mem: int, 
+             model_path: int, model_lib: str, cluster_type: str, cluster_id: int, 
+             cluster_path: str) -> None:
+        self.logger = logger
 
         # init gpu
         tf.get_logger().setLevel('ERROR')
@@ -70,40 +71,13 @@ class Model:
         # load model
         self.model = keras.models.load_model(model_path, compile=False)
         self.model.compile(optimizer="SGD", loss=None, metrics=None)
-        # save input shape
-        self.input_shape = list(self.model.layers[0].input_shape[0])
 
         # create wapper
         wapper_class = load_model_class_from_path(model_lib)
-        self.model_wapper = wapper_class(self.name, self.model)
+        self.model_wapper = wapper_class(logger, self.model, cluster_type, cluster_id, cluster_path)
 
-    """
-    Note, x_input must have an additional dimension for batch operation.
-    Eg., the input is 36x128, then x_input should be 1x36x128
-    """
-    def predict(self, step: int, x_input: np.ndarray):
-        for i in range(1, len(self.input_shape)):
-            if x_input.shape[i] != self.input_shape[i]:
-                raise Exception(f"Input shape is incorrect. Expect: {self.input_shape}")
-        
-        # call remote
+    def predict(self, step: int, x_input: pd.DataFrame):
+        # call lib
         res = self.model_wapper.predict(step, x_input)
 
         return res
-
-
-if __name__ == "__main__":
-    m = Model()
-    m.init("flow_4", "cpu", 0, "./test/0.h5", './BaseModel.py')
-    print(f"input_shape: {m.input_shape}")
-    
-    input_data = []
-    for i in range(12):
-        v = []
-        for i in range(326):
-            v.append(random.random())
-        input_data.append(v)
-    input_data = np.array([input_data])
-
-    output_data = m.predict(input_data)
-    print(output_data)

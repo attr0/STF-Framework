@@ -22,6 +22,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 import logging
+import datetime
 import asyncio
 import os
 
@@ -66,11 +67,14 @@ def startup():
     # banner
     print(banner)
     model.init(
-        name=os.environ["model_name"],
+        logger=logger,
         dev_name=os.environ["dev_name"],
         gpu_mem=int(os.environ["gpu_mem"]),
         model_path=os.environ["model_path"],
         model_lib=os.environ["model_lib"],
+        cluster_type=os.environ["cluster_type"],
+        cluster_id=int(os.environ["cluster_id"]),
+        cluster_path=os.environ["cluster_path"],
         )
 
 @app.on_event("shutdown")
@@ -98,7 +102,8 @@ async def ping_handler() -> PingRsp:
 # =============================
 class PredictionReq(BaseModel):
     step: int
-    data: str
+    start_date: datetime.datetime
+    end_date: datetime.datetime
 
 class PredictionRsp(BaseModel):
     code: int = 200,
@@ -106,12 +111,12 @@ class PredictionRsp(BaseModel):
     err: str = ""
 
 @app.post('/predict')
-async def predict_handler(req_list: PredictionReq) -> PredictionRsp:
+async def predict_handler(req: PredictionReq) -> PredictionRsp:
     async with model_lock:
         try:
-            x_input = from_str_to_numpy(req_list.data)
-            result = model.predict(req_list.step, x_input) 
-            pred = from_numpy_to_str(result)
+            x_input = fetch_data(req.start_date, req.end_date)
+            result = model.predict(req.step, x_input) 
+            pred = from_pandas_to_str(result)
 
             return PredictionRsp(
                 code=200,

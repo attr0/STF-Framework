@@ -15,6 +15,7 @@
  """
 
 from pathlib import Path
+import os
 
 """
 Reference: https://www.cnblogs.com/ydf0509/p/16663158.html
@@ -67,8 +68,10 @@ logger_config_template: dict = {
     },
 }
 
-def get_logger_config(logdir: str, name: str) -> dict:
+def get_logger_config() -> dict:
     config = logger_config_template.copy()
+    logdir = os.environ['LOGDIR']
+    name = f"{os.environ['cluster_type']}_{os.environ['cluster_id']}" 
     config['handlers']['default_file']['filename'] = Path(logdir) / (name + '.process.log')
     config['handlers']['access_file']['filename'] = Path(logdir) / (name + '.access.log')
     return config

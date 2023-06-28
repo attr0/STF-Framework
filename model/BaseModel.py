@@ -18,7 +18,8 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 import keras
-import numpy as np
+import pandas as pd
+import logging
 
 from abc import ABC
 from abc import abstractmethod
@@ -27,22 +28,34 @@ from abc import abstractmethod
 The model calling warpper class
 """
 class BaseModel(ABC):
-    name: str                # the model name. Eg. FLOW_5, SPEED_11
+    logger: logging.Logger   # the log instance
     model: keras.Model       # the actual keras model
 
-    def __init__(self, name: str, model: keras.Model) -> None:
+    cluster_type: str        # cluster type. FLOW, SPEED
+    cluster_id: int          # cluster id
+    cluster_path: str        # the cluster file path
+
+    def __init__(self, logger: logging.Logger, model: keras.Model, cluster_type: str, 
+                 cluster_id: int, cluster_path: str) -> None:
         super().__init__()
-        self.name = name
+        self.logger = logger
         self.model = model
+        self.cluster_type = cluster_type
+        self.cluster_id = cluster_id
+        self.cluster_path = cluster_path
 
     """
     Make contiously prediction of {step} step from the {X_input}
 
-    Data preprocess and postprocess should be done here!
+    Note:
+        - The clustering should be enforced here
+        - Data preprocess and postprocess should be done here
+        - Raise exception as soon as possible. Must not make tensorflow crash! (e.g. input size check)
     """
     @abstractmethod
-    def predict(self, step: int, X_input: np.ndarray):
+    def predict(self, step: int, X_input: pd.DataFrame) -> pd.DataFrame:
         pass
+
 
 """
 This is an example of BaseModel's derived class
@@ -52,11 +65,12 @@ Requirement:
 
 """
 class PredictionModel(BaseModel):
-    def __init__(self, name, model) -> None:
-        super().__init__(name, model)
-        print("Hello World from Prediction Model")
+    def __init__(self, logger: logging.Logger, model: keras.Model, cluster_type: str, 
+                 cluster_id: int, cluster_path: str) -> None:
+        super().__init__(logger, model, cluster_type, cluster_id, cluster_path)
+        self.logger.info("Hello World from Prediction Model")
 
-    def predict(self, step: int, X_input: np.ndarray):
-        print("Working Noise from Prediction Model")
+    def predict(self, step: int, X_input: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Working Noise from Prediction Model")
 
-        return self.model.predict(X_input)
+        return X_input
