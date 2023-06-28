@@ -30,17 +30,24 @@ import asyncio
 from dataclasses import dataclass
 
 @dataclass
-class ModelConfig:
+class ModelLaunchConfig:
+    # filled by model factory
     ip: str = "127.0.0.1"
     port: int = 8080
+    dev_name: str = 'cpu'
+    gpu_mem: int = 1024*1024*1024 # 1GB
+    
+    # filled by system
     logdir: str = './'
     cluster_type: str = ''
     cluster_id: int = 0
     cluster_path: str = ''
+
+    # filled by config
     model_path: str = ''
     model_lib: str = ''
-    dev_name: str = 'cpu'
-    gpu_mem: int = 1024*1024*1024 # 1GB
+
+    # filled by system
     db_host: str = '127.0.0.1'
     db_port: int = 3306
     db_db: str = 'stf'
@@ -51,11 +58,11 @@ class ModelConfig:
         return self.__dict__
 
 class Model:
-    config: ModelConfig
+    config: ModelLaunchConfig
     proc: subprocess.Popen = None
     logger: logging.Logger
 
-    def __init__(self, logger: logging.Logger, config: ModelConfig) -> None:
+    def __init__(self, logger: logging.Logger, config: ModelLaunchConfig) -> None:
         self.config = config
         self.logger = logger
 
@@ -63,7 +70,7 @@ class Model:
         if self.proc is not None:
             return
         # prepare flag
-        self.logger.info(f"Loading Model of {self.config.cluster_type}_{self.config.cluster_id}")
+        self.logger.info(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Loading")
         args = ["python", "model_instance/run.py"]
         for k, v in self.config.to_dict().items():
             args.append(f"--{k}")
@@ -86,9 +93,9 @@ class Model:
         if eflag:
             self.proc.terminate()
             self.proc = None
-            raise Exception(f"Loading Failed on Model of {self.config.cluster_type}_{self.config.cluster_id}")
+            raise Exception(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Loading Failure. (Reason: Timeout)")
 
-        self.logger.info(f"Successfully Loaded Model of {self.config.cluster_type}_{self.config.cluster_id}")
+        self.logger.info(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Load Successfully")
 
     async def predict(self, step: int, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
         payload = {
@@ -98,6 +105,7 @@ class Model:
         }
         eflag = True
         result = {}
+        self.logger.debug(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Predicts {start_date}->{end_date}, step={step}")
         for _ in range(3):
             try:
                 url = f'http://{self.config.ip}:{self.config.port}/predict'
@@ -108,10 +116,10 @@ class Model:
             except requests.exceptions.RequestException as e:
                 continue
         if eflag:
-            raise Exception(f"Prediction Timeout on Model of {self.config.cluster_type}_{self.config.cluster_id}")
+            raise Exception(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Prediction Failed. (Reason: Timeout)")
         
         if result['code'] != 200:
-            raise Exception(f"Prediction Error on Model of {self.config.cluster_type}_{self.config.cluster_id} with reason: {result['err']}")
+            raise Exception(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Prediction Failed. (Reason: {result['err']})")
 
         return from_str_to_pandas(result['msg'])
     
@@ -119,55 +127,4 @@ class Model:
         if self.proc is not None:
             self.proc.terminate()
             self.proc = None
-        self.logger.info(f"Shutdown Model of {self.config.cluster_type}_{self.config.cluster_id}")
-
-
-
-if __name__ == "__main__":
-    # async def test():
-    #     c_list = []
-    #     for i in range(4):
-    #         print(f"Good Morning from {i}\n\n")
-    #         from dateutil import parser
-    #         s = parser.parse("2022-05-01 00:00:00") 
-    #         e = parser.parse("2022-05-01 00:12:00") 
-    #         pred = asyncio.create_task(m.predict(10, s, e))
-    #         c_list.append(pred)
-        
-    #     r_list = []
-    #     for i, v in enumerate(c_list):
-    #         await v
-    #         r_list.append(v.result())
-    #         print(f"Good night from {i}\n\n")
-    #     return r_list
-    
-    # logger = logging
-    # logger.basicConfig(level = logging.INFO)
-
-    # c = ModelConfig()
-    # c.logdir = "./test/logs"
-    # c.cluster_type = "FLOW"
-    # c.cluster_id = 2
-    # c.cluster_path = "./model/BaseModel.py"
-    # c.model_path = "./test/0.h5"
-    # c.model_lib = "./model/BaseModel.py"
-    # m = Model(logger, c)
-    # m.init()
-    
-    # def signal_handler(*args):
-    #     m.shutdown()
-    #     print("Bye Bye~")
-    #     os._exit(0)
-
-    # signal.signal(signal.SIGTERM, signal_handler)
-    # signal.signal(signal.SIGABRT, signal_handler)
-    # signal.signal(signal.SIGINT, signal_handler)
-    
-    # c = test()
-    # x = asyncio.run(c)
-    # print(x[3])
-
-    while True:
-        print("We are in the parallel unvierse")
-        time.sleep(60*60*24*30)
-
+        self.logger.info(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Shutdown")

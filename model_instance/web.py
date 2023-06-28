@@ -84,7 +84,7 @@ def startup():
 
 @app.on_event("shutdown")
 def shutdown():
-    logger.info("Bye Bye")
+    pass
 
 #================================
 # Echo
@@ -126,6 +126,7 @@ async def predict_handler(req: PredictionReq) -> PredictionRsp:
             err="Resource Busy",
         )
     except Exception as e:
+        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=3)
         return PredictionRsp(
             code=300,
             msg="",
@@ -143,6 +144,7 @@ async def predict_handler(req: PredictionReq) -> PredictionRsp:
             err="",
         )
     except Exception as e:
+        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=3)
         return PredictionRsp(
             code=300,
             msg="",

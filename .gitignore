@@ -1,6 +1,7 @@
 # private
 *.h5
 *.csv
+.vscode/
 
 # python
 __pycache__/

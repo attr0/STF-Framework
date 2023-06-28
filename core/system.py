@@ -14,27 +14,74 @@
  limitations under the License.
  """
 
-import pandas as pd
-
 from model import *
+from model_factory import *
+
+import pandas as pd
+import logging
+import asyncio
+
 from typing import List
-from dataclasses import dataclass
-
-
-@dataclass
-class SystemConfig:
-    name: str = ""
-    model_configs: List[ModelConfig]
 
 class System:
+    logger: logging.Logger
+    config: SystemConfig
     model_list: List[Model] = []
+    model_conf_list: List[ModelLaunchConfig] = []
     
-    def __init__(self) -> None:
-        pass
+    def __init__(self, logger: logging.Logger, config: SystemConfig) -> None:
+        self.logger = logger
+        self.config = config
 
+    def gen_model_config(self, i: int, model_path: str):
+        m = ModelLaunchConfig()
+        m.logdir = self.config.logdir
+        m.cluster_type = self.config.name
+        m.cluster_id = i
+        m.cluster_path = self.config.cluster_path
+        m.model_lib = self.config.model_lib
+        m.model_path = model_path
+
+    def init(self) -> None:
+        self.logger.info(f"[System-{self.config.name}] Starting")
+
+        if len(self.model_list) != 0:
+            raise Exception(f"[System-{self.config.name}] Inited Multiple times!")
+        
+        for i, model_path in enumerate(self.config.model_paths):
+            # fill data
+            m_conf = self.fill_model_config(i, model_path)
+            self.model_conf_list.append(m_conf)
+            
+            # gen
+            m = mf.generate(self.logger, m_conf)
+            self.model_list.append(m)
+
+        self.logger.info(f"[System-{self.config.name}] Successfully Loaded")
+        
     def shutdown(self):
         for m in self.model_list:
             m.shutdown()
+        self.logger.info(f"Shutdown System of {self.config.name}")
 
-    async def predict(self, step: int, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
-        pass
+
+    async def predict(self, selection: List[str], step: int, start_date: datetime.datetime, 
+                      end_date: datetime.datetime) -> pd.DataFrame:
+        
+        c_list: List[asyncio.Task] = []
+        p_list: List[pd.DataFrame] = []
+
+        for m in self.model_list:
+            c_list.append(asyncio.create_task(m.predict(step, start_date, end_date)))
+
+        for c in c_list:
+            try:
+                await c
+                p_list.append(c.result())
+            # reraise the exception explicitly
+            except Exception as e:
+                raise e
+
+        df = pd.concat(p_list, axis=1)
+        df = df.reindex(selection)
+        return df
