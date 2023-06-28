@@ -14,7 +14,7 @@
  limitations under the License.
  """
 
-import argparse
+
 import tomli
 import traceback
 import os
@@ -65,16 +65,6 @@ core_config = CoreConfig()
 database_config = DataBaseConfig()
 system_config_list: List[SystemConfig] = []
 
-"""
-From cmd
-"""
-cmdArgs: argparse.Namespace
-cmdParser = argparse.ArgumentParser(prog='STF Core')
-cmdParser.add_argument('-c', '--conf', type=argparse.FileType('rb'), 
-                       help="configuration file", required=True)
-
-def arg_to_env(args: argparse.Namespace):
-    os.environ['conf'] = args.conf.name
 
 def load_configuration():
     cmd_conf = {}
@@ -89,9 +79,10 @@ def load_configuration():
         for v in cmd_conf['system'].values():
             s = SystemConfig()
             s.load_conf(v)
+            if len(s.model_paths) != s.cluster_number:
+                raise Exception(f"the number of model is not matched with the cluster. \
+                                (model_paths_len={len(s.model_paths)} != cluster_num={s.cluster_number})")
             system_config_list.append(s)
-        
-        print(system_config_list)
 
     except Exception as e:
         print(f"Cannot Parse the configuration.", file=sys.stderr)
@@ -99,6 +90,5 @@ def load_configuration():
         sys.exit(0)
 
 if __name__ == "__main__":
-    cmdArgs = cmdParser.parse_args()
-    arg_to_env(cmdArgs)
+    os.environ['conf'] = './core.toml'
     load_configuration()

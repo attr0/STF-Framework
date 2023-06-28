@@ -37,24 +37,26 @@ class System:
         m = ModelLaunchConfig()
         m.logdir = self.config.logdir
         m.cluster_type = self.config.name
-        m.cluster_id = i
+        m.cluster_id = i + 1
         m.cluster_path = self.config.cluster_path
         m.model_lib = self.config.model_lib
         m.model_path = model_path
+        return m
 
     def init(self) -> None:
         self.logger.info(f"[System-{self.config.name}] Starting")
 
         if len(self.model_list) != 0:
-            raise Exception(f"[System-{self.config.name}] Inited Multiple times!")
+            raise Exception(f"[System-{self.config.name}] Init Multiple times!")
         
         for i, model_path in enumerate(self.config.model_paths):
             # fill data
-            m_conf = self.fill_model_config(i, model_path)
+            m_conf = self.gen_model_config(i, model_path)
             self.model_conf_list.append(m_conf)
             
             # gen
             m = mf.generate(self.logger, m_conf)
+            m.init()
             self.model_list.append(m)
 
         self.logger.info(f"[System-{self.config.name}] Successfully Loaded")
@@ -62,7 +64,7 @@ class System:
     def shutdown(self):
         for m in self.model_list:
             m.shutdown()
-        self.logger.info(f"Shutdown System of {self.config.name}")
+        self.logger.info(f"[System-{self.config.name}] Shutdown")
 
 
     async def predict(self, selection: List[str], step: int, start_date: datetime.datetime, 
@@ -81,7 +83,9 @@ class System:
             # reraise the exception explicitly
             except Exception as e:
                 raise e
-
+            
         df = pd.concat(p_list, axis=1)
-        df = df.reindex(selection)
+        if len(selection) != 0:
+            df = df.reindex(columns=selection)
+
         return df

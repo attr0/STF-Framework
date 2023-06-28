@@ -20,6 +20,7 @@ from config import *
 import logging
 import asyncio
 import os
+import threading
 import tensorflow as tf
 
 from dataclasses import dataclass
@@ -37,10 +38,10 @@ class ModelFactory:
     ip: str
     min_port: int
     next_port: int
-    lock = asyncio.Lock()
+    lock = threading.Lock()
     dev_list = List[GPUInstance]
 
-    def __init__(self, ip:str, dev: str, min_port: int) -> None:
+    def init(self, ip:str, dev: str, min_port: int) -> None:
         self.dev = dev
         self.ip = ip
         self.min_port = min_port
@@ -75,8 +76,12 @@ class ModelFactory:
                         g = gi
                         gi.gpu_mem -= core_config.gpu_mem
                         break
+                if g is None:
+                    raise Exception(f"No enough gpu memory!")
+                
                 config.dev_name = g.gpu_name
                 config.gpu_mem = core_config.gpu_mem
+
 
             # inject core config
             config.ip = self.ip
@@ -84,23 +89,18 @@ class ModelFactory:
             self.min_port += 1
 
             # inject db config
-            config.db_host = core_config.db_host
-            config.db_port = core_config.db_port
-            config.db_db = core_config.db_db
-            config.db_user = core_config.db_user
-            config.db_pwd = core_config.db_pwd
+            config.db_host = database_config.host
+            config.db_port = database_config.port
+            config.db_db   = database_config.db
+            config.db_user = database_config.user
+            config.db_pwd  = database_config.pwd
 
             # init
             m = Model(logger, config)
-            m.init()
             return m
         
         finally:
             self.lock.release()
 
 
-mf = ModelFactory(
-    ip=core_config.listen_ip,
-    dev=core_config.dev,
-    min_port=core_config.min_port,
-)
+mf = ModelFactory()

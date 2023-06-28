@@ -21,7 +21,11 @@ import pathlib
 
 cmdArgs: argparse.Namespace
 
-cmdParser = argparse.ArgumentParser(prog='STF Model Instance',)
+class ThrowingArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise Exception(message)
+    
+cmdParser = ThrowingArgumentParser(prog='STF Model Instance',)
 
 """
 For web

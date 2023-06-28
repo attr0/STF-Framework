@@ -18,17 +18,27 @@ from config import *
 from logger import *
 
 import uvicorn
+import os
+import sys
+import traceback
 
 if __name__ == "__main__":
-    cmdArgs = cmdParser.parse_args()
-    arg_to_env(cmdArgs)
-    logger_config = get_logger_config()
+    try:
+        cmdArgs = cmdParser.parse_args()
+        arg_to_env(cmdArgs)
+        logger_config = get_logger_config()
 
-    uvicorn.run(
-        "web:app",
-        host=cmdArgs.ip, 
-        port=cmdArgs.port, 
-        reload=False, 
-        log_config=logger_config,
-        lifespan='on'
-        )
+        uvicorn.run(
+            "web:app",
+            host=cmdArgs.ip, 
+            port=cmdArgs.port, 
+            reload=False, 
+            log_config=logger_config,
+            lifespan='on'
+            )
+    except Exception as e:
+        with open('panic.log', 'a') as f:
+            f.write("\n=======================================\n")
+            f.write(f"<<<<NODE Launch Error>>>>\n")
+            traceback.print_exc(limit=1, file=f)
+            f.flush()

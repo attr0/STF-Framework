@@ -1,7 +1,7 @@
 [core]
 dev = "cpu"
 listen_ip = "127.0.0.1" 
-min_port = 1000
+min_port = 10000
 gpu_mem = 300 # unit: MiB
 
 [database]
@@ -15,8 +15,8 @@ pwd = "stf"
 name = "FLOW"
 cluster_path = "./test/a.csv"
 cluster_number = 2
-logdir = "./test/log/"
-model_lib = "./model_instance/base_model.py"
+logdir = "./test/logs/"
+model_lib = "./node/base_model.py"
 model_paths = [
     "./test/0.h5",
     "./test/0.h5"

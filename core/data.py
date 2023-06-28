@@ -39,3 +39,10 @@ def from_pandas_to_str(data: pd.DataFrame) -> str:
     data = base64.b85encode(buffer.getvalue())
     # from base64 bytes to str
     return data.decode("ascii")
+
+def from_pandas_to_dict(data: pd.DataFrame) -> dict:
+    res = {}
+    for k in data.columns:
+        v = list(data.loc[:, k])
+        res[k] = v
+    return res

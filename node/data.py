@@ -43,7 +43,7 @@ class DataFetcher:
         #         charset="utf8",
         #     )
 
-        self.tmp_df = pd.read_hdf(r"F:\Python Project\STF\test\total_flow.h5", "df")
+        self.tmp_df = pd.read_hdf("./test/total_flow.h5", "df")
 
     def fetch(self, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
         """

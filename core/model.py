@@ -18,14 +18,10 @@ from data import *
 
 import subprocess
 import logging
-import signal
 import time
 import requests
 import datetime
-import os
 import pandas as pd
-import asyncio
-
 
 from dataclasses import dataclass
 
@@ -71,23 +67,25 @@ class Model:
             return
         # prepare flag
         self.logger.info(f"[Model-{self.config.cluster_type}_{self.config.cluster_id}] Loading")
-        args = ["python", "model_instance/run.py"]
+        args = ["python", "node/run.py"]
         for k, v in self.config.to_dict().items():
             args.append(f"--{k}")
             args.append(str(v))
         # start process
         self.proc = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(3)
+        # self.proc = subprocess.Popen(args)
+        time.sleep(5)
 
         # ping
         eflag = True
-        for _ in range(3):
+        for _ in range(10):
             try:
                 url = f'http://{self.config.ip}:{self.config.port}/ping'
                 requests.post(url, timeout=5)
                 eflag = False
                 if not eflag:
                     break
+                time.sleep(3)
             except requests.exceptions.RequestException as e:
                 continue
         if eflag:

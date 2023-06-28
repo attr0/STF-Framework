@@ -66,21 +66,25 @@ banner = """
 def startup():
     # banner
     print(banner)
-    data_fetcher.init(
-        cluster_type=os.environ["cluster_type"],
-        cluster_id=int(os.environ["cluster_id"]),
-    )
-
-    model.init(
-        logger=logger,
-        dev_name=os.environ["dev_name"],
-        gpu_mem=int(os.environ["gpu_mem"]),
-        model_path=os.environ["model_path"],
-        model_lib=os.environ["model_lib"],
-        cluster_type=os.environ["cluster_type"],
-        cluster_id=int(os.environ["cluster_id"]),
-        cluster_path=os.environ["cluster_path"],
+    try:
+        data_fetcher.init(
+            cluster_type=os.environ["cluster_type"],
+            cluster_id=int(os.environ["cluster_id"]),
         )
+
+        model.init(
+            logger=logger,
+            dev_name=os.environ["dev_name"],
+            gpu_mem=int(os.environ["gpu_mem"]),
+            model_path=os.environ["model_path"],
+            model_lib=os.environ["model_lib"],
+            cluster_type=os.environ["cluster_type"],
+            cluster_id=int(os.environ["cluster_id"]),
+            cluster_path=os.environ["cluster_path"],
+            )
+    except Exception as e:
+        logger.error(f"Model Launch Error: {e}", stack_info=True, stacklevel=1)
+        raise(e)
 
 @app.on_event("shutdown")
 def shutdown():
@@ -126,7 +130,7 @@ async def predict_handler(req: PredictionReq) -> PredictionRsp:
             err="Resource Busy",
         )
     except Exception as e:
-        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=3)
+        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=1)
         return PredictionRsp(
             code=300,
             msg="",
@@ -144,7 +148,7 @@ async def predict_handler(req: PredictionReq) -> PredictionRsp:
             err="",
         )
     except Exception as e:
-        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=3)
+        logger.error(f"Prediction Error: {e}", stack_info=True, stacklevel=1)
         return PredictionRsp(
             code=300,
             msg="",
