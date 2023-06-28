@@ -63,8 +63,8 @@ class Model:
         if self.proc is not None:
             return
         # prepare flag
-        self.logger.info(f"Starting Model of {self.config.cluster_type}_{self.config.cluster_id}")
-        args = ["python", "model/run.py"]
+        self.logger.info(f"Loading Model of {self.config.cluster_type}_{self.config.cluster_id}")
+        args = ["python", "model_instance/run.py"]
         for k, v in self.config.to_dict().items():
             args.append(f"--{k}")
             args.append(str(v))
@@ -88,7 +88,7 @@ class Model:
             self.proc = None
             raise Exception(f"Loading Failed on Model of {self.config.cluster_type}_{self.config.cluster_id}")
 
-        self.logger.info(f"Loaded Model of {self.config.cluster_type}_{self.config.cluster_id}")
+        self.logger.info(f"Successfully Loaded Model of {self.config.cluster_type}_{self.config.cluster_id}")
 
     async def predict(self, step: int, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
         payload = {
@@ -124,48 +124,48 @@ class Model:
 
 
 if __name__ == "__main__":
-    async def test():
-        c_list = []
-        for i in range(4):
-            print(f"Good Morning from {i}\n\n")
-            from dateutil import parser
-            s = parser.parse("2022-05-01 00:00:00") 
-            e = parser.parse("2022-05-01 00:12:00") 
-            pred = asyncio.create_task(m.predict(10, s, e))
-            c_list.append(pred)
+    # async def test():
+    #     c_list = []
+    #     for i in range(4):
+    #         print(f"Good Morning from {i}\n\n")
+    #         from dateutil import parser
+    #         s = parser.parse("2022-05-01 00:00:00") 
+    #         e = parser.parse("2022-05-01 00:12:00") 
+    #         pred = asyncio.create_task(m.predict(10, s, e))
+    #         c_list.append(pred)
         
-        r_list = []
-        for i, v in enumerate(c_list):
-            await v
-            r_list.append(v.result())
-            print(f"Good night from {i}\n\n")
-        return r_list
+    #     r_list = []
+    #     for i, v in enumerate(c_list):
+    #         await v
+    #         r_list.append(v.result())
+    #         print(f"Good night from {i}\n\n")
+    #     return r_list
     
-    logger = logging
-    logger.basicConfig(level = logging.INFO)
+    # logger = logging
+    # logger.basicConfig(level = logging.INFO)
 
-    c = ModelConfig()
-    c.logdir = "./test/logs"
-    c.cluster_type = "FLOW"
-    c.cluster_id = 2
-    c.cluster_path = "./model/BaseModel.py"
-    c.model_path = "./test/0.h5"
-    c.model_lib = "./model/BaseModel.py"
-    m = Model(logger, c)
-    m.init()
+    # c = ModelConfig()
+    # c.logdir = "./test/logs"
+    # c.cluster_type = "FLOW"
+    # c.cluster_id = 2
+    # c.cluster_path = "./model/BaseModel.py"
+    # c.model_path = "./test/0.h5"
+    # c.model_lib = "./model/BaseModel.py"
+    # m = Model(logger, c)
+    # m.init()
     
-    def signal_handler(*args):
-        m.shutdown()
-        print("Bye Bye~")
-        os._exit(0)
+    # def signal_handler(*args):
+    #     m.shutdown()
+    #     print("Bye Bye~")
+    #     os._exit(0)
 
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGABRT, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGTERM, signal_handler)
+    # signal.signal(signal.SIGABRT, signal_handler)
+    # signal.signal(signal.SIGINT, signal_handler)
     
-    c = test()
-    x = asyncio.run(c)
-    print(x[3])
+    # c = test()
+    # x = asyncio.run(c)
+    # print(x[3])
 
     while True:
         print("We are in the parallel unvierse")
