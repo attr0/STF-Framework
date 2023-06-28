@@ -30,4 +30,5 @@ if __name__ == "__main__":
         port=cmdArgs.port, 
         reload=False, 
         log_config=logger_config,
+        lifespan='on'
         )

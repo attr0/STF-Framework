@@ -14,14 +14,14 @@
  limitations under the License.
  """
 
-import pymysql
-import os
+import subprocess
+import time
 
-DB = pymysql.connect(
-        host=os.environ['DB_HOST'],
-        port=int(os.environ['DB_PORT']),
-        database=os.environ['DB_DB'],
-        user=os.environ['DB_USER'],
-        passwd=os.environ['DB_PWD'],
-        charset="utf8",
-    )
+class Model:
+    pass
+
+if __name__ == "__main__":
+    x = subprocess.Popen('python run.py --cluster_type FLOW --cluster_id 1 --cluster_path "./BaseModel.py" --model_path "../test/0.h5" --model_lib "./BaseModel.py" --dev_name cpu', 
+                         cwd="F:\\Python Project\\STF\\model", stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(30)
+    x.terminate()
