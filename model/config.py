@@ -27,7 +27,7 @@ cmdParser = argparse.ArgumentParser(prog='STF Model Instance',)
 For web
 """
 cmdParser.add_argument('--ip', help="listened ip", default="0.0.0.0")
-cmdParser.add_argument('--port', type=int, help="listened port", default="8080")
+cmdParser.add_argument('--port', type=int, help="listened port", default=8080)
 cmdParser.add_argument('--logdir', type=pathlib.Path, help="the log file directory", default='./')
 
 """
@@ -45,17 +45,20 @@ cmdParser.add_argument('--gpu_mem', type=int, help="the limit for gpu memory. (n
 """
 For database
 """
-# cmdParser.add_argument('--db_host', default="127.0.0.1")
-# cmdParser.add_argument('--db_port', default="3306")
-# cmdParser.add_argument('--db_db', default="stf")
-# cmdParser.add_argument('--db_user', default="stf")
-# cmdParser.add_argument('--db_pwd', default="stf")
+cmdParser.add_argument('--db_host', default="127.0.0.1")
+cmdParser.add_argument('--db_port', default="3306")
+cmdParser.add_argument('--db_db', default="stf")
+cmdParser.add_argument('--db_user', default="stf")
+cmdParser.add_argument('--db_pwd', default="stf")
 
 
 def arg_to_env(args: argparse.Namespace):
     for i in args._get_kwargs():
         t = tuple(i)
-        if type(t[1]) == str:
+
+        if t[0] == 'logdir':
+            os.environ[t[0]] = str(pathlib.Path(t[1]).absolute())
+        elif type(t[1]) == str:
             os.environ[t[0]] = t[1]
         elif type(t[1]) == int:
             os.environ[t[0]] = str(t[1])

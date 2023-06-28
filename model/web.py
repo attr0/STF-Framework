@@ -117,20 +117,36 @@ class PredictionRsp(BaseModel):
 
 @app.post('/predict')
 async def predict_handler(req: PredictionReq) -> PredictionRsp:
-    async with model_lock:
-        try:
-            x_input = data_fetcher.fetch(req.start_date, req.end_date)
-            result = model.predict(req.step, x_input) 
-            pred = from_pandas_to_str(result)
+    try:
+        await asyncio.wait_for(model_lock.acquire(), 60)
+    except asyncio.TimeoutError:
+        return PredictionRsp(
+            code=300,
+            msg="",
+            err="Resource Busy",
+        )
+    except Exception as e:
+        return PredictionRsp(
+            code=300,
+            msg="",
+            err=str(e),
+        )
 
-            return PredictionRsp(
-                code=200,
-                msg=pred,
-                err="",
-            )
-        except Exception as e:
-            return PredictionRsp(
-                code=300,
-                msg="",
-                err=str(e),
-            )
+    try:
+        x_input = data_fetcher.fetch(req.start_date, req.end_date)
+        result = model.predict(req.step, x_input) 
+        pred = from_pandas_to_str(result)
+
+        return PredictionRsp(
+            code=200,
+            msg=pred,
+            err="",
+        )
+    except Exception as e:
+        return PredictionRsp(
+            code=300,
+            msg="",
+            err=str(e),
+        )
+    finally:
+        model_lock.release()
