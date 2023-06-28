@@ -15,35 +15,55 @@
  """
 
 import pandas as pd
-import random
 import base64
 import datetime
 import io
 import pymysql
-import os
 
-DB = pymysql.connect(
-        host=os.environ['DB_HOST'],
-        port=int(os.environ['DB_PORT']),
-        database=os.environ['DB_DB'],
-        user=os.environ['DB_USER'],
-        passwd=os.environ['DB_PWD'],
-        charset="utf8",
-    )
+"""
+TODO: Wait for database system
+"""
+class DataFetcher:
+    cluster_type: str
+    cluster_id: int
 
-def fetch_data(start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
-    pass
+    db_conn: pymysql.connect
+    tmp_df: pd.DataFrame
+
+    def init(self, cluster_type: str, cluster_id: int):
+        self.cluster_type = cluster_type
+        self.cluster_id = cluster_id
+
+        # self.db_conn = pymysql.connect(
+        #         host=os.environ['DB_HOST'],
+        #         port=int(os.environ['DB_PORT']),
+        #         database=os.environ['DB_DB'],
+        #         user=os.environ['DB_USER'],
+        #         passwd=os.environ['DB_PWD'],
+        #         charset="utf8",
+        #     )
+
+        self.tmp_df = pd.read_hdf(r"F:\Python Project\STF\test\total_flow.h5", "df")
+
+    def fetch(self, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
+        """
+        Test only
+        """
+        t: pd.DataFrame = self.tmp_df.loc[start_date:end_date]
+        offset = (self.cluster_id-1) * 400
+        return t.iloc[:, offset:offset+400]
+        # return t
 
 
 def from_str_to_pandas(data: str) -> pd.DataFrame:
     # from str to base64 bytes
     data = data.encode("ascii")
     # from base64 bytes to bytes
-    data = base64.b64decode(data)
+    data = base64.b85decode(data)
     # create buffer
     buffer = io.BytesIO(data)
     # load from buffer
-    data = pd.read_pickle(buffer)
+    data = pd.read_pickle(buffer, compression='xz')
     # retrun result
     return data
 
@@ -51,30 +71,18 @@ def from_pandas_to_str(data: pd.DataFrame) -> str:
     buffer = io.BytesIO()
 
     # from pandas to bytes
-    data.to_pickle(buffer)
+    data.to_pickle(buffer, compression='xz')
     # from bytes to base64 bytes
-    data = base64.b64encode(buffer.getvalue())
+    data = base64.b85encode(buffer.getvalue())
     # from base64 bytes to str
     return data.decode("ascii")
 
 
 if __name__ == "__main__":
-    input_data = []
-    for i in range(12):
-        v = []
-        for i in range(326):
-            v.append(random.random())
-        input_data.append(v)
-    input_data = pd.DataFrame(input_data)
-    input_data = input_data.reindex([x for x in range(325, -1, -1)], axis=1)
-
-    print(input_data, input_data.shape)
-    print("<\t>\t" * 30)
-
-    a = from_pandas_to_str(input_data)
-    print(a)
-    print("<\t>\t" * 30)
-
-    b = from_str_to_pandas(a)
-    print(b, b.shape)
-    
+    d = DataFetcher()
+    d.init("flow", 2)
+    from dateutil import parser
+    s = parser.parse("2022-05-01 00:00:00") 
+    e = parser.parse("2022-05-01 00:12:00") 
+    x = d.fetch(s, e)
+    print(x)

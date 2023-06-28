@@ -47,6 +47,7 @@ app = FastAPI(
 model_lock = asyncio.Lock()
 logger = logging.getLogger("uvicorn.error")
 model = Model()
+data_fetcher = DataFetcher()
 
 #================================
 # Setup
@@ -66,6 +67,11 @@ banner = """
 def startup():
     # banner
     print(banner)
+    data_fetcher.init(
+        cluster_type=os.environ["cluster_type"],
+        cluster_id=int(os.environ["cluster_id"]),
+    )
+
     model.init(
         logger=logger,
         dev_name=os.environ["dev_name"],
@@ -114,7 +120,7 @@ class PredictionRsp(BaseModel):
 async def predict_handler(req: PredictionReq) -> PredictionRsp:
     async with model_lock:
         try:
-            x_input = fetch_data(req.start_date, req.end_date)
+            x_input = data_fetcher.fetch(req.start_date, req.end_date)
             result = model.predict(req.step, x_input) 
             pred = from_pandas_to_str(result)
 

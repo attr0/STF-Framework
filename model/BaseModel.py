@@ -35,6 +35,12 @@ class BaseModel(ABC):
     cluster_id: int          # cluster id
     cluster_path: str        # the cluster file path
 
+    """
+    Resource Init
+
+    Note:
+        - You may init the cluster here
+    """    
     def __init__(self, logger: logging.Logger, model: keras.Model, cluster_type: str, 
                  cluster_id: int, cluster_path: str) -> None:
         super().__init__()
@@ -51,11 +57,11 @@ class BaseModel(ABC):
         - The clustering should be enforced here
         - Data preprocess and postprocess should be done here
         - Raise exception as soon as possible. Must not make tensorflow crash! (e.g. input size check)
+        - The returned pd.DataFrame must have correct indexes and column names.
     """
     @abstractmethod
     def predict(self, step: int, X_input: pd.DataFrame) -> pd.DataFrame:
         pass
-
 
 """
 This is an example of BaseModel's derived class
