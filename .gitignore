@@ -3,6 +3,10 @@
 *.csv
 .vscode/
 
+# config
+*.toml
+!example.toml
+
 # python
 __pycache__/
 *.py[cod]
