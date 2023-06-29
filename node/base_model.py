@@ -79,4 +79,5 @@ class PredictionModel(BaseModel):
     def predict(self, step: int, X_input: pd.DataFrame) -> pd.DataFrame:
         self.logger.info("[Prediction Model] Working Noise")
 
-        return X_input
+        offset = (self.cluster_id-1) * 400
+        return X_input.iloc[:step, offset:offset+400]

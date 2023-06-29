@@ -76,8 +76,7 @@ class Model:
         # create wapper
         wapper_class = load_model_class_from_path(model_lib)
         self.model_wapper = wapper_class(logger, self.model, cluster_type, cluster_id, cluster_path)
-        self.logger.info(f"[Model] Load Successfully")
-
+        self.logger.info(f"[Model] Successfully Load on {model_path}")
 
     def predict(self, step: int, x_input: pd.DataFrame):
         # call lib

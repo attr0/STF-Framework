@@ -49,6 +49,7 @@ class ModelLaunchConfig:
     db_db: str = 'stf'
     db_user: str = 'stf'
     db_pwd: str = 'stf'
+    h5_path: str = ''
 
     def to_dict(self) -> dict:
         return self.__dict__

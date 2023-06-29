@@ -41,6 +41,7 @@ class System:
         m.cluster_path = self.config.cluster_path
         m.model_lib = self.config.model_lib
         m.model_path = model_path
+        m.h5_path = self.config.h5_path
         return m
 
     def init(self) -> None:

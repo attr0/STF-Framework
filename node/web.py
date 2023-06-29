@@ -68,6 +68,7 @@ def startup():
     print(banner)
     try:
         data_fetcher.init(
+            logger=logger,
             cluster_type=os.environ["cluster_type"],
             cluster_id=int(os.environ["cluster_id"]),
         )

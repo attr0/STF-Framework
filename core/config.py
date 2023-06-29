@@ -19,6 +19,7 @@ import tomli
 import traceback
 import os
 import sys
+import signal
 
 from dataclasses import dataclass, field
 from typing import List
@@ -55,6 +56,7 @@ class SystemConfig:
     logdir: str = './'
     model_lib: str = ''
     model_paths: List[str] = field(default_factory=list)
+    h5_path: str = ''
 
     def load_conf(self, conf: dict):        
         for k in self.__dict__.keys():
@@ -86,7 +88,7 @@ def load_configuration():
     except Exception as e:
         print(f"Cannot Parse the configuration.", file=sys.stderr)
         traceback.print_exc(limit=1, file=sys.stdout)
-        sys.exit(-1)
+        os.kill(os.getpid(), signal.SIGTERM)
 
 if __name__ == "__main__":
     os.environ['conf'] = './core.toml'

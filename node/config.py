@@ -49,6 +49,7 @@ cmdParser.add_argument('--gpu_mem', type=int, help="the limit for gpu memory. (n
 """
 For database
 """
+cmdParser.add_argument('--h5_path', help="The path to the local hdf5 file. Enable this flag would disable database.", default="")
 cmdParser.add_argument('--db_host', default="127.0.0.1")
 cmdParser.add_argument('--db_port', default="3306")
 cmdParser.add_argument('--db_db', default="stf")

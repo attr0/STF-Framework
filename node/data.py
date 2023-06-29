@@ -19,6 +19,8 @@ import base64
 import datetime
 import io
 import pymysql
+import os
+import logging
 
 """
 TODO: Wait for database system
@@ -27,32 +29,40 @@ class DataFetcher:
     cluster_type: str
     cluster_id: int
 
+    isLocalFile = False
     db_conn: pymysql.connect
-    tmp_df: pd.DataFrame
+    df: pd.DataFrame
 
-    def init(self, cluster_type: str, cluster_id: int):
+    def init(self, logger: logging.Logger, cluster_type: str, cluster_id: int):
         self.cluster_type = cluster_type
         self.cluster_id = cluster_id
 
-        # self.db_conn = pymysql.connect(
-        #         host=os.environ['DB_HOST'],
-        #         port=int(os.environ['DB_PORT']),
-        #         database=os.environ['DB_DB'],
-        #         user=os.environ['DB_USER'],
-        #         passwd=os.environ['DB_PWD'],
-        #         charset="utf8",
-        #     )
+        if len(os.environ['H5_PATH']) != 0:
+            # local file
+            self.df = pd.read_hdf(os.environ['H5_PATH'], "df")
+            logger.info(f"[Data Fetcher] Init on the local file: {os.environ['H5_PATH']}")
+        else:
+            raise Exception("[Data Fetcher] Database Model has not been implemented yet")
 
-        self.tmp_df = pd.read_hdf("./test/total_flow.h5", "df")
+            # use database
+            self.db_conn = pymysql.connect(
+                    host=os.environ['DB_HOST'],
+                    port=int(os.environ['DB_PORT']),
+                    database=os.environ['DB_DB'],
+                    user=os.environ['DB_USER'],
+                    passwd=os.environ['DB_PWD'],
+                    charset="utf8",
+                )
+
 
     def fetch(self, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
-        """
-        Test only
-        """
-        t: pd.DataFrame = self.tmp_df.loc[start_date:end_date]
-        offset = (self.cluster_id-1) * 400
-        return t.iloc[:, offset:offset+400]
-        # return t
+        if self.isLocalFile:
+            # local file
+            t: pd.DataFrame = self.tmp_df.loc[start_date:end_date]
+            return t
+        else:
+            # database
+            raise Exception("[Data Fetcher] Database Model has not been implemented yet")
 
 
 def from_str_to_pandas(data: str) -> pd.DataFrame:
