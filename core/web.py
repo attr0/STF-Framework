@@ -65,6 +65,19 @@ system_mapping: Dict[str, System] = {}
 
 @app.on_event("startup")
 def startup():
+    # handle win32 signal
+    try:
+        # for windows
+        import win32api
+        def console_shutdown(x):
+            shutdown()
+            os.kill(os.getpid(), signal.SIGINT)
+    
+        win32api.SetConsoleCtrlHandler(console_shutdown)
+        logger.info("Win32 Signal Hanlder Registered")
+    except:
+        pass
+
     # banner
     print(banner)
 
@@ -80,10 +93,11 @@ def startup():
         shutdown()
         raise(e)
 
-@app.on_event("shutdown")
+@app.on_event("shutdown") # never worked
 def shutdown():
     for _, v in system_mapping.items():
         v.shutdown()
+    logger.info("See you next time~")
 
 #================================
 # Echo
