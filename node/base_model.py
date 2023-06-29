@@ -74,9 +74,9 @@ class PredictionModel(BaseModel):
     def __init__(self, logger: logging.Logger, model: keras.Model, cluster_type: str, 
                  cluster_id: int, cluster_path: str) -> None:
         super().__init__(logger, model, cluster_type, cluster_id, cluster_path)
-        self.logger.info("Hello World from Prediction Model")
+        self.logger.info("[Prediction Model] Hello World")
 
     def predict(self, step: int, X_input: pd.DataFrame) -> pd.DataFrame:
-        self.logger.info("Working Noise from Prediction Model")
+        self.logger.info("[Prediction Model] Working Noise")
 
         return X_input

@@ -53,20 +53,21 @@ class Model:
 
         # init gpu
         tf.get_logger().setLevel('ERROR')
-        if dev_name != "cpu":
+        if dev_name == "cpu":
+            self.logger.info(f"[Model] Running on cpu")
+        else: # GPU
             gpus = tf.config.list_physical_devices("GPU")
-            if dev_name not in gpus:
-                raise Exception(f"No gpu named: {dev_name}")
-
             # Restrict TensorFlow to only allocate {gpu_mem_size}Bytes of memory on the {gpu_dev}
             try:
                 tf.config.set_logical_device_configuration(
-                    dev_name,
+                    gpus[0],
                     [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=gpu_mem) ],
                     )
             except RuntimeError as e:
                 # Virtual devices must be set before GPUs have been initialized
                 raise Exception(e)
+            gpus = tf.config.list_logical_devices('GPU')
+            self.logger.info(f"[Model] Running on {gpus[0]}")
         
         # load model
         self.model = keras.models.load_model(model_path, compile=False)
@@ -75,6 +76,8 @@ class Model:
         # create wapper
         wapper_class = load_model_class_from_path(model_lib)
         self.model_wapper = wapper_class(logger, self.model, cluster_type, cluster_id, cluster_path)
+        self.logger.info(f"[Model] Load Successfully")
+
 
     def predict(self, step: int, x_input: pd.DataFrame):
         # call lib

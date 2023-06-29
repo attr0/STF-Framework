@@ -39,7 +39,7 @@ class ModelFactory:
     min_port: int
     next_port: int
     lock = threading.Lock()
-    dev_list = List[GPUInstance]
+    dev_list: List[GPUInstance] = []
 
     def init(self, ip:str, dev: str, min_port: int) -> None:
         self.dev = dev
@@ -53,8 +53,8 @@ class ModelFactory:
                 desc = os.popen(f'nvidia-smi.exe --query-gpu=memory.free -i 0 --format=csv').readlines()
                 if len(desc) != 2:
                     break
-                mem = int(desc[1].split(' ')[0]) * 1024 * 1024
-                g = GPUInstance(i, v, mem)
+                mem = int(desc[1].split(' ')[0])
+                g = GPUInstance(i, v.name, mem)
                 self.dev_list.append(g)
         elif dev == 'cpu':
             pass
@@ -79,7 +79,7 @@ class ModelFactory:
                 if g is None:
                     raise Exception(f"No enough gpu memory!")
                 
-                config.dev_name = g.gpu_name
+                config.dev_name = str(g.gpu_id)
                 config.gpu_mem = core_config.gpu_mem
 
 

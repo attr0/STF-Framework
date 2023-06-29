@@ -1,8 +1,9 @@
 [core]
-dev = "cpu"
+dev = "gpu"
 listen_ip = "127.0.0.1" 
 min_port = 10000
-gpu_mem = 300 # unit: MiB
+gpu_mem = 500  # unit: MiB. Please not the final gpu_mem would takes
+                # additional 200M per model
 
 [database]
 host = "127.0.0.1"
@@ -14,10 +15,11 @@ pwd = "stf"
 [system.flow]
 name = "FLOW"
 cluster_path = "./test/a.csv"
-cluster_number = 2
+cluster_number = 3
 logdir = "./test/logs/"
 model_lib = "./node/base_model.py"
 model_paths = [
     "./test/0.h5",
-    "./test/0.h5"
+    "./test/0.h5",
+    "./test/0.h5",
 ]

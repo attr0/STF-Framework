@@ -43,7 +43,7 @@ cmdParser.add_argument('--cluster_path', type=argparse.FileType('r'), help="the 
 
 cmdParser.add_argument('--model_path', type=argparse.FileType('r'), help="the path to prediction model", required=True)
 cmdParser.add_argument('--model_lib', type=argparse.FileType('r'), help="the path to prediction model lib script", required=True)
-cmdParser.add_argument('--dev_name', help="which device should this model runs on. ('cpu' or a physical gpu device name)", required=True)
+cmdParser.add_argument('--dev_name', help="which device should this model runs on. ('cpu' or a physical cuda device id)", required=True)
 cmdParser.add_argument('--gpu_mem', type=int, help="the limit for gpu memory. (not work when use 'cpu' in dev_name)", default=0)
 
 """
@@ -69,3 +69,7 @@ def arg_to_env(args: argparse.Namespace):
         # file type
         elif type(t[1]):
             os.environ[t[0]] = t[1].name
+
+    # inject tensorflow gpu
+    if args.dev_name != 'cpu':
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.dev_name

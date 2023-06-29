@@ -80,14 +80,13 @@ def load_configuration():
             s = SystemConfig()
             s.load_conf(v)
             if len(s.model_paths) != s.cluster_number:
-                raise Exception(f"the number of model is not matched with the cluster. \
-                                (model_paths_len={len(s.model_paths)} != cluster_num={s.cluster_number})")
+                raise Exception(f"the number of model is not matched with the cluster. (model_paths_len={len(s.model_paths)} != cluster_num={s.cluster_number})")
             system_config_list.append(s)
 
     except Exception as e:
         print(f"Cannot Parse the configuration.", file=sys.stderr)
         traceback.print_exc(limit=1, file=sys.stdout)
-        sys.exit(0)
+        sys.exit(-1)
 
 if __name__ == "__main__":
     os.environ['conf'] = './core.toml'
