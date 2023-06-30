@@ -92,6 +92,7 @@ if __name__ == "__main__":
 
         uvicorn.run(
             "web:app",
+            server_header=False,
             host=cmdArgs.ip, 
             port=cmdArgs.port, 
             reload=False, 

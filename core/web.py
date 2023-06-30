@@ -146,10 +146,10 @@ async def predict_handler(req: PredictionReq) -> PredictionRsp:
             raise Exception(f"Prediction Error. System-{req.system} does not exist")
         
         s = system_mapping[req.system]
-        r = await s.predict(req.selection, req.step, req.start_date, req.end_date)
-        r = from_pandas_to_dict(r)
-        r = json.dumps(r, allow_nan=True)
-
+        pred = await s.predict(req.selection, req.step, req.start_date, req.end_date)
+        pred = from_pandas_to_dict(pred)
+        r = PredictionRsp(code=200, msg=pred, err="")
+        r = json.dumps(r.__dict__, allow_nan=True)
         return Response(content=r, media_type='application/json')
     
     except Exception as e:
