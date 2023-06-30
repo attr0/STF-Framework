@@ -2,8 +2,8 @@
 dev = "gpu"
 listen_ip = "127.0.0.1" 
 min_port = 10000
-gpu_mem = 500  # unit: MiB. Please not the final gpu_mem would takes
-                # additional 200M per model
+gpu_mem = 500   # unit: MiB. Please note the final gpu_mem 
+                # would takes additional 200M per model
 
 [database]
 host = "127.0.0.1"
@@ -23,5 +23,5 @@ model_paths = [
     "./test/0.h5",
     "./test/0.h5",
 ]
-h5_path = "./test/total_flow.h5" # when not use it, please
+h5_path = "./test/total_flow.h5" # when not using it, please
                                  # set it to empty string

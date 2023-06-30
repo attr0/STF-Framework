@@ -7,10 +7,10 @@ TODO:
 
 ### Arch
 
-![overall_architecture](./arch.png)
+![overall architecture](./docs/arch.png)
 
 
 
 ### Design Schema
 
-![overall_architecture](./design.png)
+![design schema](./docs/design.png)
