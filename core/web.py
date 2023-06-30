@@ -115,13 +115,13 @@ async def ping_handler() -> PingRsp:
         err=""
     )
 
-#================================
-# Terminate
-#===============================
-@app.post("/shutdown")
-async def shutdown_handler() -> None:
-    shutdown()
-    os.kill(os.getpid(), signal.SIGINT)
+# #================================
+# # Terminate
+# #===============================
+# @app.post("/shutdown")
+# async def shutdown_handler() -> None:
+#     shutdown()
+#     os.kill(os.getpid(), signal.SIGINT)
 
 
 # =============================

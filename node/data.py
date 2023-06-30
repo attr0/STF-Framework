@@ -59,7 +59,7 @@ class DataFetcher:
     def fetch(self, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.DataFrame:
         if self.isLocalFile:
             # local file
-            t: pd.DataFrame = self.tmp_df.loc[start_date:end_date]
+            t: pd.DataFrame = self.df.loc[start_date:end_date]
             return t
         else:
             # database
