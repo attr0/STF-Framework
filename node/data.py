@@ -39,6 +39,7 @@ class DataFetcher:
 
         if len(os.environ['H5_PATH']) != 0:
             # local file
+            self.isLocalFile = True
             self.df = pd.read_hdf(os.environ['H5_PATH'], "df")
             logger.info(f"[Data Fetcher] Init on the local file: {os.environ['H5_PATH']}")
         else:
